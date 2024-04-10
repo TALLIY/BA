@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import pickle
-from Datasets import CoordinateDataset
+from datasets.coordinate_data_loader import CoordinateDataset
 from network_implementations import dense_network, sparse_network
 from dotenv import load_dotenv
 import os
