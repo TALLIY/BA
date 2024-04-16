@@ -1,5 +1,7 @@
-import torch.nn as nn
 import torch
+import torch.nn as nn
+from connectivity_masks import lower_traingular_mask, upper_traingular_mask
+
 
 class sparse_layer(nn.Linear):
     def __init__(self, input_size, output_size, sparse_mask=None):
@@ -18,3 +20,17 @@ class sparse_layer(nn.Linear):
             return torch.matmul(x, sparse_weight.t())
         else:
             return torch.matmul(x, self.weight.t())
+
+
+def upper_traingular_layer(input_dim, output_dim):
+    layer = sparse_layer(
+        input_dim, output_dim, sparse_mask=upper_traingular_mask(input_dim, output_dim)
+    )
+    return layer
+
+
+def lower_traingular_layer(input_dim, output_dim):
+    layer = sparse_layer(
+        input_dim, output_dim, sparse_mask=lower_traingular_mask(input_dim, output_dim)
+    )
+    return layer

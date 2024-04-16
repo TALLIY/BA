@@ -102,13 +102,13 @@ class BTCS:
 
         return surr_f
 
-    def generate_data(self, number_of_iterations, datapoints):
+    def generate_data(self, number_of_iterations, datapoints, path, filename):
         m = datapoints
         for i in range(0, m):
-            self._genrate_data_helper(number_of_iterations)
+            self._genrate_data_helper(number_of_iterations, path, filename)
             print(f"run [{i + 1}/{m}] done")
 
-    def _genrate_data_helper(self, number_of_iterations):
+    def _genrate_data_helper(self, number_of_iterations, path, filename):
         dt = self.dt
         a_vec = self.a_vec
         boundary_0 = self.boundary_0
@@ -130,10 +130,10 @@ class BTCS:
             a_vec = copy.deepcopy(X)
             timesteps.append(a_vec)
             i += 1
-        self._save_data_to_csv(timesteps, "training.csv")
+        self._save_data_to_csv(timesteps, path, filename)
 
-    def _save_data_to_csv(self, timesteps, filename):
-        if self._file_exists("../datasets", filename):
+    def _save_data_to_csv(self, timesteps, path, filename):
+        if self._file_exists(path, filename):
             with open(filename, "a", newline="") as csvfile:
                 csv_writer = csv.writer(csvfile)
                 csv_writer.writerow(timesteps[0])

@@ -1,27 +1,34 @@
+import os
+import pickle
+
 import torch
 import torch.nn as nn
-import pickle
-from datasets.coordinate_data_loader import CoordinateDataset
-from network_implementations import dense_network, sparse_network
+from coordinate_dataset_loader import coordinate_dataset
 from dotenv import load_dotenv
-import os
+from networks import dense_network, sparse_network
 
 load_dotenv()
-train_dense_network = os.getenv("TRAIN_DENSE_NETWORK")
+train_dense_network = False
 
+if os.getenv("TRAIN_DENSE_NETWORK") == "0":
+    train_dense_network = False
+
+print(train_dense_network)
+
+torch.autograd.set_detect_anomaly(True)
 
 # Device configuration
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Hyper-parameters
 layer_size = 99
-num_epochs = 20
+num_epochs = 25
 batch_size = 100
-learning_rate = 0.001
+learning_rate = 0.0001
 
 # training and test datasets
-train_dataset = CoordinateDataset("./training.csv")
-test_dataset = CoordinateDataset("./test.csv")
+train_dataset = coordinate_dataset("../shared/datasets/training.csv")
+test_dataset = coordinate_dataset("../shared/datasets/test.csv")
 
 # normalisation
 train_loader_norm = torch.utils.data.DataLoader(
@@ -35,9 +42,12 @@ for input_values, output_values in enumerate(train_loader_norm):
     min_value = torch.min(concat_tensor)
     max_value = torch.max(concat_tensor)
 
-MinMaxScalerParams = {"min": min_value, "max": max_value}
-with open("MinMaxScaler.pkl", "wb") as f:
-    pickle.dump(MinMaxScalerParams, f)
+min_max_scaling_params = {"min": min_value, "max": max_value}
+with open(
+    f"../shared/parameters/min_max_scaling_params_for_layer_size_{layer_size}_for_dense_{str(train_dense_network)}.pkl",
+    "wb",
+) as f:
+    pickle.dump(min_max_scaling_params, f)
 
 
 # Data loaders
@@ -50,8 +60,8 @@ test_loader = torch.utils.data.DataLoader(
 )
 
 
-#model
-if(train_dense_network == "1"):
+# model
+if train_dense_network:
     model = dense_network(layer_size).to(device)
 else:
     model = sparse_network(layer_size).to(device)
@@ -59,7 +69,7 @@ model.float()
 
 # Loss and optimizer
 criterion = nn.MSELoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
 # Train the model
 n_total_steps = len(train_loader)
@@ -116,5 +126,15 @@ with torch.no_grad():
     print(f"max coefficient of determination of the network on the test data: {max_r2}")
     print(f"min coefficient of determination of the network on the test data: {min_r2}")
 
+    test_results = {"mean_cod": mean_r2, "min_cod": min_r2, "max_cod": max_r2}
+    with open(
+        f"../shared/parameters/test_results_for_layer_size_{layer_size}_for_dense_{str(train_dense_network)}.pkl",
+        "wb",
+    ) as f:
+        pickle.dump(test_results, f)
 
-torch.save(model.state_dict(), "model_weights.pth")
+
+torch.save(
+    model.state_dict(),
+    f"../shared/weights/model_weights_for_layer_size_{layer_size}_for_dense_{str(train_dense_network)}.pth",
+)
