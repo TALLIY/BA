@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 from networks import dense_network, sparse_network
 
 load_dotenv()
-train_dense_network = False
+train_dense_network = True
 
 if os.getenv("TRAIN_DENSE_NETWORK") == "0":
     train_dense_network = False
@@ -21,14 +21,14 @@ torch.autograd.set_detect_anomaly(True)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Hyper-parameters
-layer_size = 99
-num_epochs = 25
-batch_size = 100
-learning_rate = 0.0001
+layer_size = 299
+num_epochs = 10
+batch_size = 2
+learning_rate = 0.00001
 
 # training and test datasets
-train_dataset = coordinate_dataset("../shared/datasets/training.csv")
-test_dataset = coordinate_dataset("../shared/datasets/test.csv")
+train_dataset = coordinate_dataset("../shared/datasets/training_n_299.csv")
+test_dataset = coordinate_dataset("../shared/datasets/testing/testing_n_299.csv")
 
 # normalisation
 train_loader_norm = torch.utils.data.DataLoader(
@@ -69,7 +69,7 @@ model.float()
 
 # Loss and optimizer
 criterion = nn.MSELoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
 # Train the model
 n_total_steps = len(train_loader)
@@ -89,7 +89,7 @@ for epoch in range(num_epochs):
 
         if (i + 1) % 100 == 0:
             print(
-                f"Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{n_total_steps}], Loss: {loss.item():.6f}"
+                f"Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{n_total_steps}], Loss: {loss.item():.8f}"
             )
 
 # Test the model
@@ -128,7 +128,7 @@ with torch.no_grad():
 
     test_results = {"mean_cod": mean_r2, "min_cod": min_r2, "max_cod": max_r2}
     with open(
-        f"../shared/parameters/test_results_for_layer_size_{layer_size}_for_dense_{str(train_dense_network)}.pkl",
+        f"../shared/test_results/test_results_for_layer_size_{layer_size}_for_dense_{str(train_dense_network)}.pkl",
         "wb",
     ) as f:
         pickle.dump(test_results, f)

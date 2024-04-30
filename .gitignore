@@ -4,3 +4,7 @@ training.csv
 test.csv
 .env
 model_weights.pth
+
+shared/datasets
+shared/parameters
+shared/test_results
