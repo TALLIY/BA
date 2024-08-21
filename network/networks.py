@@ -36,20 +36,16 @@ class sparse_network(nn.Module):
         self.leakyRelu = nn.LeakyReLU()
 
     def forward(self, x):
-        out = self.upper_traingular1(x)
-        out = self.leakyRelu(out)
-        out = self.lower_traingular1(out)
-        out = self.leakyRelu(out)
-        out = self.upper_traingular2(x)
+        out = self.lower_traingular1(x)
+        out = self.upper_traingular1(out)
         out = self.leakyRelu(out)
         out = self.lower_traingular2(out)
-        out = self.leakyRelu(out)
-        out = self.upper_traingular3(x)
+        out = self.upper_traingular2(out)
         out = self.leakyRelu(out)
         out = self.lower_traingular3(out)
+        out = self.upper_traingular3(out)
         out = self.leakyRelu(out)
-        out = self.upper_traingular4(x)
-        out = self.leakyRelu(out)
+        out = self.upper_traingular4(out)
         out = self.lower_traingular4(out)
 
         return out

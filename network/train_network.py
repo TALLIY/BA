@@ -21,14 +21,14 @@ torch.autograd.set_detect_anomaly(True)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Hyper-parameters
-layer_size = 299
+layer_size = 99
 num_epochs = 10
 batch_size = 2
 learning_rate = 0.00001
 
 # training and test datasets
-train_dataset = coordinate_dataset("../shared/datasets/training_n_299.csv")
-test_dataset = coordinate_dataset("../shared/datasets/testing/testing_n_299.csv")
+train_dataset = coordinate_dataset("../shared/datasets/training_n_99.csv")
+test_dataset = coordinate_dataset("../shared/datasets/testing/testing_n_99.csv")
 
 # normalisation
 train_loader_norm = torch.utils.data.DataLoader(

@@ -1,13 +1,10 @@
 import copy
 import csv
-import os
 import pickle
 
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from dotenv import load_dotenv
-from networks import dense_network, sparse_network
 
 
 class BTCS:
@@ -196,31 +193,35 @@ class BTCS:
             csv_writer.writerow(timesteps[-1])
 
 
-load_dotenv()
-train_dense_network = True
-if os.getenv("TRAIN_DENSE_NETWORK") == "0":
-    train_dense_network = False
-
-print(train_dense_network)
-
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 sim = BTCS(length=1, delta_x=0.005, alpha=0.01, delta_t=0.01, min_T=0, max_T=1000)
 
-sim.finite_difference(number_of_iterations=100, graph=True)
+sim.finite_difference(number_of_iterations=1000, graph=True)
 
-if train_dense_network:
-    model = dense_network(199).to(device)
-else:
-    model = sparse_network(199).to(device)
+# load_dotenv()
+# train_dense_network = True
+# if os.getenv("TRAIN_DENSE_NETWORK") == "0":
+#     train_dense_network = False
 
-sim.infer_final_step_value(
-    model=model,
-    state_dict_path="../shared/weights/model_weights_for_layer_size_199_for_dense_False.pth",
-    denormalisation_params_path="../shared/parameters/min_max_scaling_params_for_layer_size_199_for_dense_False.pkl",
-    compare=True,
-    number_of_iterations=100,
-)
+# print(train_dense_network)
+
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# sim = BTCS(length=1, delta_x=0.005, alpha=0.01, delta_t=0.01, min_T=0, max_T=1000)
+
+# sim.finite_difference(number_of_iterations=100, graph=True)
+
+# if train_dense_network:
+#     model = dense_network(199).to(device)
+# else:
+#     model = sparse_network(199).to(device)
+
+# sim.infer_final_step_value(
+#     model=model,
+#     state_dict_path="../shared/weights/model_weights_for_layer_size_199_for_dense_False.pth",
+#     denormalisation_params_path="../shared/parameters/min_max_scaling_params_for_layer_size_199_for_dense_False.pkl",
+#     compare=True,
+#     number_of_iterations=100,
+# )
 
 
 # sim = BTCS(length=1, delta_x=0.002, alpha=0.01, delta_t=0.01, min_T=0, max_T=1000)

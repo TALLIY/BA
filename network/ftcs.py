@@ -75,7 +75,7 @@ class FTCS:
 
         if graph:
             for j in range(1, len(timesteps)):
-                if j % 1000 == 0:
+                if j % 100 == 0:
                     plt.plot(
                         list(np.linspace(0, self.L, n)),
                         timesteps[j],
@@ -91,7 +91,7 @@ class FTCS:
 
         print("dim: ", len(timesteps[-1]))
 
-        return timesteps
+        return {"timesteps": timesteps, "matrix": X}
 
     def generate_data(self, number_of_iterations, number_of_datapoints, path):
         m = number_of_datapoints
@@ -126,9 +126,9 @@ class FTCS:
 
 sim = FTCS(length=1, n=101, alpha=0.01, min_T=0, max_T=100)
 
-sim.generate_function(10000, "../shared/generated_functions")
+# sim.generate_function(10000, "../shared/generated_functions")
 
-# sim.finite_difference(number_of_iterations=10000, graph=True)
+sim.finite_difference(number_of_iterations=1000, graph=True)
 
 # sim.generate_data(
 #     number_of_iterations=10000,

@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 from torch.func import jacfwd
+from torchviz import make_dot
 
 A_dim = np.load(
     "../shared/generated_functions/A_10000_bound(20.0-73.0)_maxmin(0-100).npy"
@@ -9,8 +10,11 @@ A_dim = np.load(
 A = torch.tensor(np.array(A_dim))
 
 
-def func(x):
-    return torch.matmul(A, x)
+def func(x: torch.Tensor):
+    y = torch.cos(x) ** 2
+    z = torch.log(y)
+    w = torch.sin(z)
+    return w
 
 
 T = np.random.uniform(0, 100, size=101)
@@ -22,10 +26,13 @@ x = torch.tensor(T, requires_grad=True)
 
 jacobian = jacfwd(func)(x)
 
-print(jacobian)
+dot = make_dot(jacobian, params={"x": x})
+dot.render("jacobian_graph", format="png", cleanup=True)
 
 
 def traverse_graph(var, nodes=set(), edges=set(), node_info={}, edge_info=[]):
+    print("dir(var)")
+    print(var.next_functions[0])
     if var not in nodes:
         nodes.add(var)
         if hasattr(var, "variable"):
