@@ -1,5 +1,5 @@
 import sys
-from typing import List, Literal, Tuple, Union
+from typing import List
 
 import matplotlib.pyplot as plt
 import torch
@@ -30,6 +30,10 @@ class FTCS:
         self.T_vec[0] = self.boundary_0
         self.T_vec[-1] = self.boundary_1
 
+        self.matrix_chain: List[torch.Tensor] = []
+        self.current_matrix_chain_index = 0
+        self.number_of_iterations = 0
+
         # initialise the matrix
         self.A = torch.zeros((n, n))
         for j in range(n):
@@ -48,7 +52,9 @@ class FTCS:
         self.A[-1, -1] = 1
 
     def finite_difference(self, number_of_iterations, graph=False):
+        self.number_of_iterations = number_of_iterations
         A = torch.tensor(self.A)
+        print(A)
         T_0 = torch.tensor(self.T_vec, requires_grad=True)
 
         print("Temperature with initial conditions")
@@ -56,12 +62,17 @@ class FTCS:
 
         # a vector values at each timestep
         timesteps = [T_0]
+
+        hook_handlers = []
         i = 0
         while i < number_of_iterations:
-            timesteps.append(torch.matmul(A, timesteps[i]))
+            y = torch.matmul(A, timesteps[i])
+            hook_handle = y.register_hook(self._hook_fn)
+            timesteps.append(y)
+            hook_handlers.append(hook_handle)
             i += 1
 
-        self._construct_computational_graph(timesteps[-1])
+        self._generate_matrix_chain(timesteps[-1], timesteps[0])
 
         print("Temperature for final timestep: ", T_0)
         print("Number of iterations: ", len(timesteps))
@@ -86,71 +97,103 @@ class FTCS:
 
         print("dim: ", len(timesteps[-1]))
 
-    def _construct_computational_graph(self, result: torch.Tensor):
-        matrix_chain: List[List[torch.Tensor]] = []
+    def _generate_matrix_chain(self, result: torch.Tensor, input: torch.Tensor):
         for i in range(len(result)):
-            seed = torch.tensor(1.0)
-            grad_fn = result[i].grad_fn
-            derivatives = grad_fn(seed)
-            recursion_depth = 0
+            input.grad = None
+            result[i].backward(retain_graph=True)
 
-            if isinstance(derivatives, tuple):
-                for _, derivative in enumerate(derivatives):
-                    if derivative is None:
-                        continue
-
-                    self._add_matrix_to_chain(recursion_depth, derivative, matrix_chain)
-                    self._get_der_from_node(
-                        derivative, grad_fn, matrix_chain, recursion_depth
-                    )
-            else:
-                self._add_matrix_to_chain(recursion_depth, derivatives, matrix_chain)
-                self._get_der_from_node(
-                    derivatives, grad_fn, matrix_chain, recursion_depth
-                )
-        print("matrix_chain")
-        print(matrix_chain)
-
-    def _get_der_from_node(
-        self,
-        prev_derivative: Tuple[Union[torch.Tensor, Literal[0]], ...],
-        grad_fn: torch.Node | None,
-        matrix_chain: List[List[torch.Tensor]],
-        recursion_depth,
-    ):
-        recursion_depth += 1
-        next_functions = grad_fn.next_functions
-
-        for _, function in enumerate(next_functions):
-            if function[0] is None or prev_derivative is None:
-                continue
-            derivatives = function[0](prev_derivative)
-            if isinstance(derivatives, tuple):
-                for derivative in derivatives:
-                    if derivative is None:
-                        continue
-                    self._add_matrix_to_chain(recursion_depth, derivative, matrix_chain)
-                    self._get_der_from_node(
-                        derivative, function[0], matrix_chain, recursion_depth
-                    )
-            else:
-                self._add_matrix_to_chain(recursion_depth, derivatives, matrix_chain)
-                self._get_der_from_node(
-                    derivatives, function[0], matrix_chain, recursion_depth
-                )
-
-    def _add_matrix_to_chain(
-        self,
-        index: int,
-        derivative: torch.Tensor,
-        matrix_chain: List[List[torch.Tensor]],
-    ):
-        if index >= len(matrix_chain):
-            matrix_chain.append([derivative])
+    def _hook_fn(self, grad: torch.Tensor):
+        grad_row = grad.unsqueeze(0)
+        index = self.current_matrix_chain_index
+        if len(self.matrix_chain) < self.number_of_iterations:
+            self.matrix_chain.append(grad_row)
         else:
-            matrix_chain[index].append(derivative)
+            self.matrix_chain[index] = torch.cat(
+                (self.matrix_chain[index], grad_row), dim=0
+            )
+            self._increment_matrix_chain_index()
+
+    def _increment_matrix_chain_index(self):
+        if self.current_matrix_chain_index + 1 >= self.number_of_iterations:
+            self.current_matrix_chain_index = 0
+        else:
+            self.current_matrix_chain_index += 1
+
+    # def _construct_computational_graph_recursive(self, result: torch.Tensor):
+    #     matrix_chain: List[torch.Tensor] = []
+    #     for i in range(len(result)):
+    #         seed = torch.tensor(1.0)
+    #         grad_fn = result[i].grad_fn
+    #         derivatives = grad_fn(seed)
+    #         recursion_depth = 0
+
+    #         if isinstance(derivatives, tuple):
+    #             for _, derivative in enumerate(derivatives):
+    #                 if derivative is None:
+    #                     continue
+
+    #                 self._add_matrix_to_chain_recursive(
+    #                     recursion_depth, derivative, matrix_chain
+    #                 )
+    #                 self._get_der_from_node_recursive(
+    #                     derivative, grad_fn, matrix_chain, recursion_depth
+    #                 )
+    #         else:
+    #             self._add_matrix_to_chain_recursive(
+    #                 recursion_depth, derivatives, matrix_chain
+    #             )
+    #             self._get_der_from_node_recursive(
+    #                 derivatives, grad_fn, matrix_chain, recursion_depth
+    #             )
+    #     print(matrix_chain[-1])
+
+    # def _get_der_from_node_recursive(
+    #     self,
+    #     prev_derivative: Tuple[Union[torch.Tensor, Literal[0]], ...],
+    #     grad_fn: torch.Node | None,
+    #     matrix_chain: List[torch.Tensor],
+    #     recursion_depth,
+    # ):
+    #     recursion_depth += 1
+    #     next_functions = grad_fn.next_functions
+
+    #     for _, function in enumerate(next_functions):
+    #         if function[0] is None or prev_derivative is None:
+    #             continue
+    #         derivatives = function[0](prev_derivative)
+    #         if isinstance(derivatives, tuple):
+    #             for derivative in derivatives:
+    #                 if derivative is None:
+    #                     continue
+    #                 self._add_matrix_to_chain_recursive(
+    #                     recursion_depth, derivative, matrix_chain
+    #                 )
+    #                 self._get_der_from_node_recursive(
+    #                     derivative, function[0], matrix_chain, recursion_depth
+    #                 )
+    #         else:
+    #             self._add_matrix_to_chain_recursive(
+    #                 recursion_depth, derivatives, matrix_chain
+    #             )
+    #             self._get_der_from_node_recursive(
+    #                 derivatives, function[0], matrix_chain, recursion_depth
+    #             )
+
+    # def _add_matrix_to_chain_recursive(
+    #     self,
+    #     index: int,
+    #     derivative: torch.Tensor,
+    #     matrix_chain: List[torch.Tensor],
+    # ):
+    #     derivative_row = derivative.unsqueeze(0)
+    #     if index >= len(matrix_chain):
+    #         matrix_chain.append(derivative_row)
+    #     else:
+    #         matrix_chain[index] = torch.cat(
+    #             (matrix_chain[index], derivative_row), dim=0
+    #         )
 
 
 sim = FTCS(length=1, n=101, alpha=0.01, min_T=0, max_T=100)
 
-sim.finite_difference(number_of_iterations=1000, graph=True)
+sim.finite_difference(number_of_iterations=1000, graph=False)
