@@ -81,42 +81,64 @@ def increment():
 
 def add_to_matrix_chain(
     derivative: torch.Tensor,
+    index: int,
 ):
     derivative_row = derivative.unsqueeze(0)
-    if len(matrix_chain) < num_operations:
+    print(index)
+    print(len(matrix_chain))
+    if len(matrix_chain) <= index:
         matrix_chain.append(derivative_row)
     else:
-        matrix_chain[counter] = torch.cat(
-            (matrix_chain[counter], derivative_row), dim=0
-        )
-        increment()
+        matrix_chain[index] = torch.cat((matrix_chain[index], derivative_row), dim=0)
 
 
 seed = torch.ones_like(l[0])
 seed_vector = torch.ones_like(x)
 
-for i in range(len(l)):
-    dl = l[i].grad_fn(seed)
-    add_to_matrix_chain(dl)
 
-    dp = l[i].grad_fn.next_functions[0][0](dl)
-    add_to_matrix_chain(dp[1])
+def traverse_graph(function, recursion_depth, curent_seed):
+    recursion_depth += 1
+    next_functions = function.next_functions
+    for _, function in enumerate(next_functions):
+        if function[0] is None:
+            continue
+        derivatives = function[0](curent_seed)
+        if isinstance(derivatives, tuple):
+            for index, derivative in enumerate(derivatives):
+                if derivative is None:
+                    continue
+                if index > 1:
+                    raise Exception("More indices than expected")
 
-    dv = l[i].grad_fn.next_functions[0][0].next_functions[1][0](dl)
-    add_to_matrix_chain(dv)
+                add_to_matrix_chain(derivative, recursion_depth)
+                traverse_graph(function[0], recursion_depth, curent_seed)
 
-    dw = l[i].grad_fn.next_functions[0][0].next_functions[1][0].next_functions[0][0](dl)
-    add_to_matrix_chain(dw[1])
-
-    dx = (
-        l[i]
-        .grad_fn.next_functions[0][0]
-        .next_functions[1][0]
-        .next_functions[0][0]
-        .next_functions[1][0](dl)
-    )
-    add_to_matrix_chain(dx[1])
+        else:
+            add_to_matrix_chain(derivatives, recursion_depth)
+            traverse_graph(function[0], recursion_depth, curent_seed)
 
 
-for matrix in matrix_chain:
-    print(matrix)
+def construct_graph():
+    for i in range(len(l)):
+        recursion_depth = 0
+        grad_fn = l[i].grad_fn
+        derivatives = l[i].grad_fn(seed)
+        if isinstance(derivatives, tuple):
+            for index, derivative in enumerate(derivatives):
+                if derivative is None:
+                    continue
+                if index > 1:
+                    raise Exception("More indices than expected")
+
+                add_to_matrix_chain(derivative, recursion_depth)
+                traverse_graph(grad_fn, recursion_depth, curent_seed=derivative)
+        else:
+            add_to_matrix_chain(derivatives, recursion_depth)
+            traverse_graph(grad_fn, recursion_depth, curent_seed=derivatives)
+
+    print(len(matrix_chain))
+    for matrix in matrix_chain:
+        print(matrix)
+
+
+construct_graph()
