@@ -5,6 +5,7 @@ import pickle
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
+from computational_graph_builder import ComputationalGrapBuilder
 
 
 class BTCS:
@@ -113,10 +114,15 @@ class BTCS:
             f = np.random.uniform(self.min_T, self.max_T, size=self.n)
             f[0] = self.boundary_0
             f[-1] = self.boundary_1
-            surr_f = (
-                model(torch.tensor(f.astype(np.float32))).detach() * (max - min)
-            ) + min
+            input = torch.tensor(f.astype(np.float32), requires_grad=True)
+            surr_f = (model(input) * (max - min)) + min
 
+            cdp = ComputationalGrapBuilder()
+
+            chain = cdp.construct_graph(surr_f)
+
+            for matrix in chain:
+                print(matrix)
         else:
             f = np.random.uniform(self.min_T, self.max_T, size=self.n)
             surr_f = model(torch.tensor(f.astype(np.float32))).detach()
@@ -195,7 +201,7 @@ class BTCS:
 
 sim = BTCS(length=1, delta_x=0.005, alpha=0.01, delta_t=0.01, min_T=0, max_T=1000)
 
-sim.finite_difference(number_of_iterations=1000, graph=True)
+# sim.finite_difference(number_of_iterations=1000, graph=False)
 
 # load_dotenv()
 # train_dense_network = True

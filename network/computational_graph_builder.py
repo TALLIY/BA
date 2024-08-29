@@ -20,9 +20,6 @@ class ComputationalGrapBuilder:
             self._add_to_jacobian_chain(derivative, recursion_depth)
             self._traverse_graph(grad_fn, recursion_depth, curent_seed=derivative)
 
-        print(len(self.jacobian_chain))
-        print(self.jacobian_chain[9][9])
-        print(self.jacobian_chain[98][10])
         return self.jacobian_chain
 
     def _traverse_graph(
@@ -43,7 +40,7 @@ class ComputationalGrapBuilder:
 
             derivative = self._pick_derivative(function[0](curent_seed), function[0])
             self._add_to_jacobian_chain(derivative, recursion_depth)
-            self._traverse_graph(function[0], recursion_depth, curent_seed)
+            self._traverse_graph(function[0], recursion_depth, derivative)
 
     def _add_to_jacobian_chain(
         self,
@@ -65,9 +62,28 @@ class ComputationalGrapBuilder:
         if isinstance(derivatives, tuple):
             if "AddmmBackward" in function.__class__.__name__:
                 return derivatives[1]
-            if "MvBackward" in function.__class__.__name__:
+            elif "MvBackward" in function.__class__.__name__:
                 return derivatives[1]
-            if "ViewBackward" in function.__class__.__name__:
+            elif "ViewBackward" in function.__class__.__name__:
                 return derivatives[1]
+            elif "SqueezeBackward" in function.__class__.__name__:
+                return derivatives[0]
+            elif "LeakyReluBackward" in function.__class__.__name__:
+                return derivatives[0]
+            elif "UnsqueezeBackward" in function.__class__.__name__:
+                return derivatives[0]
+            elif "MmBackward" in function.__class__.__name__:
+                return derivatives[0]
+            elif "MulBackward" in function.__class__.__name__:
+                return derivatives[0]
+            elif "AddBackward" in function.__class__.__name__:
+                return derivatives[0]
+            else:
+                for index, derivative in enumerate(derivatives):
+                    if index > 1:
+                        raise Exception("More indices than expected")
+                    if derivative is None:
+                        continue
+                    return derivative
         else:
             return derivatives
