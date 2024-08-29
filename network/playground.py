@@ -241,3 +241,6 @@ for matrix in chain:
 # )
 
 # print(d13)
+
+n = torch.eye(100)
+print(n[1].shape)

@@ -18,7 +18,9 @@ class ComputationalGrapBuilder:
             )
 
             self._add_to_jacobian_chain(derivative, recursion_depth)
-            self._traverse_graph(grad_fn, recursion_depth, curent_seed=derivative)
+            self._traverse_graph(
+                grad_fn, recursion_depth, prev_derivative=derivative, current_index=i
+            )
 
         return self.jacobian_chain
 
@@ -26,7 +28,8 @@ class ComputationalGrapBuilder:
         self,
         function: torch.Node | None,
         recursion_depth: int,
-        curent_seed: torch.Tensor,
+        prev_derivative: torch.Tensor,
+        current_index: int,
     ):
         recursion_depth += 1
         next_functions: torch.Node = function.next_functions
@@ -38,9 +41,12 @@ class ComputationalGrapBuilder:
             ):
                 continue
 
-            derivative = self._pick_derivative(function[0](curent_seed), function[0])
+            seed = self._generate_seed(prev_derivative, current_index)
+            derivative = self._pick_derivative(function[0](seed), function[0])
             self._add_to_jacobian_chain(derivative, recursion_depth)
-            self._traverse_graph(function[0], recursion_depth, derivative)
+            self._traverse_graph(
+                function[0], recursion_depth, derivative, current_index=current_index
+            )
 
     def _add_to_jacobian_chain(
         self,
@@ -87,3 +93,9 @@ class ComputationalGrapBuilder:
                     return derivative
         else:
             return derivatives
+
+    def _generate_seed(self, derivative, index):
+        if derivative.shape[0] == 1:
+            return self.eye[index].unsqueeze(0)
+        else:
+            return self.eye[index]
