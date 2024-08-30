@@ -1,7 +1,6 @@
 __pycache__/
 
-training.csv
-test.csv
+*.csv
 .env
 model_weights.pth
 

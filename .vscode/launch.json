@@ -1,0 +1,27 @@
+{
+    "version": "0.2.0",
+    "configurations":[
+        {
+            "name": "Rosenbrock: generate data points",
+            "type": "python",
+            "request": "launch",
+            "program": "rosenbrock/generate_data/generate_data.py",
+            "env": {
+              "IS_DEBUG_MODE": "1",
+              "PYTHONPATH": "${workspaceFolder}"
+            },
+            "envFile": "${workspaceFolder}/rosenbrock/.env"
+          },
+          {
+            "name": "Rosenbrock: Train Network",
+            "type": "python",
+            "request": "launch",
+            "program": "rosenbrock/train_network.py",
+            "env": {
+              "IS_DEBUG_MODE": "1",
+              "PYTHONPATH": "${workspaceFolder}"
+            },
+            "envFile": "${workspaceFolder}/rosenbrock/.env"
+          },
+    ]
+}
