@@ -8,8 +8,8 @@ from rosenbrock.generate_data.function import rosenbrock_gradient
 
 def generate_data(no_of_data_points: int):
     for i in range(no_of_data_points):
-        x = np.random.uniform(-4.0, 4.0)
-        y = np.random.uniform(-3, 6)
+        x = np.random.uniform(-2.0, 2.0)
+        y = np.random.uniform(-1.0, 3.0)
         input = np.array([x, y])
 
         grad = rosenbrock_gradient(input)

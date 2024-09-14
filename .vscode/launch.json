@@ -23,5 +23,27 @@
             },
             "envFile": "${workspaceFolder}/rosenbrock/.env"
           },
+          {
+            "name": "Rosenbrock: Visualize Function",
+            "type": "python",
+            "request": "launch",
+            "program": "rosenbrock/generate_data/visualize_function.py",
+            "env": {
+              "IS_DEBUG_MODE": "1",
+              "PYTHONPATH": "${workspaceFolder}"
+            },
+            "envFile": "${workspaceFolder}/rosenbrock/.env"
+          },
+          {
+            "name": "Rosenbrock: Playground",
+            "type": "python",
+            "request": "launch",
+            "program": "rosenbrock/Playground.py",
+            "env": {
+              "IS_DEBUG_MODE": "1",
+              "PYTHONPATH": "${workspaceFolder}"
+            },
+            "envFile": "${workspaceFolder}/rosenbrock/.env"
+          },
     ]
 }
