@@ -25,8 +25,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Hyper-parameters
 layer_size = 2
-num_epochs = 5
-batch_size = 1
+num_epochs = 3
+batch_size = 5
 learning_rate = 0.001
 
 # training and test datasets

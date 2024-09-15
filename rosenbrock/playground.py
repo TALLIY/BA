@@ -37,7 +37,9 @@ import torch.nn as nn
 layer_size = 3
 
 
-parameters_list = [nn.Parameter(torch.rand(layer_size - i)) for i in range(layer_size)]
+parameters_list = nn.ParameterList(
+    [nn.Parameter(torch.rand(layer_size - i)) for i in range(layer_size)]
+)
 
 
 x = torch.tensor([3.0, 2.0, 1.0])
@@ -53,21 +55,41 @@ dim = len(parameters_list)
 # print(y)
 
 
-for i in reversed(range(len(parameters_list))):
+for i in range(len(parameters_list)):
     parameters_list[i] = torch.cat(
         (
             parameters_list[i],
-            torch.zeros(i),
+            torch.zeros(len(parameters_list) - len(parameters_list[i])),
         ),
         dim=0,
     )
 
-matrix = torch.stack([component.squeeze(0) for component in parameters_list], dim=0)
+# matrix = torch.stack([component.squeeze(0) for component in parameters_list], dim=0)
 
 
-print(matrix)
-print(type(matrix))
-print(matrix.shape)
+# print(matrix)
+# print(type(matrix))
+# print(matrix.shape)
 
 for param in parameters_list:
     print(param)
+
+
+parameter_top = nn.Parameter(torch.rand([1]))
+parameter_bottom = nn.Parameter(torch.rand([2]))
+
+print(
+    torch.stack(
+        [
+            torch.cat(
+                (
+                    parameter_top,
+                    torch.tensor([0]),
+                ),
+                dim=0,
+            ),
+            parameter_bottom,
+        ],
+        dim=0,
+    )
+)

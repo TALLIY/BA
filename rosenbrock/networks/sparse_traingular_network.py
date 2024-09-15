@@ -21,7 +21,7 @@ class SpareTraingularNetwork(nn.Module):
         self.Upperlayer4 = UpperTraingularSparseLayer(layer_size)
         self.Lowerlayer4 = LowerTraingularSparseLayer(layer_size)
 
-        self.activation = nn.SiLU()
+        self.activation = nn.Softplus()
 
     def forward(self, x):
         out = self.Upperlayer1(x)
