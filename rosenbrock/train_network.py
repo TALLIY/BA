@@ -15,11 +15,10 @@ from rosenbrock.scaling import (
 load_dotenv()
 train_dense_network = True
 
-
 if os.getenv("TRAIN_DENSE_NETWORK") == "0":
     train_dense_network = False
 
-print(train_dense_network)
+print("Training Sparse Network: ", not train_dense_network)
 
 torch.autograd.set_detect_anomaly(True)
 
@@ -27,14 +26,15 @@ torch.autograd.set_detect_anomaly(True)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Hyper-parameters
-layer_size = 2
-num_epochs = 200
-batch_size = 500
-learning_rate = 0.01
+layer_size = int(os.getenv("LAYER_SIZE"))
+num_epochs = int(os.getenv("NUM_EPOCHS"))
+batch_size = int(os.getenv("BATCH_SIZE"))
+learning_rate = int(os.getenv("LEARNING_RATE"))
+training_dataset_path = os.getenv("DATASET_PATH")
+
 
 # training and test datasets
-train_dataset = CoordinateDataset("rosenbrock/datasets/rosenbrock_training_data.csv")
-# test_dataset = CoordinateDataset("rosenbrock/datasets/rosenbrock_testing_data.csv")
+train_dataset = CoordinateDataset(training_dataset_path)
 
 # Normalization
 params_file_path = (
@@ -70,11 +70,6 @@ else:
 train_loader = torch.utils.data.DataLoader(
     dataset=train_dataset, batch_size=batch_size, shuffle=True
 )
-
-
-# test_loader = torch.utils.data.DataLoader(
-#     dataset=test_dataset, batch_size=batch_size, shuffle=False
-# )
 
 
 # model
@@ -117,46 +112,6 @@ for epoch in range(num_epochs):
             )
 
     scheduler.step()
-
-
-# Test the model
-# with torch.no_grad():
-#     total_r2 = []
-#     for input_values, output_values in test_loader:
-#         input_values = input_values.to(device)
-#         outputs = (
-#             model(input_values)
-#             * (min_max_scaling_params["max"] - min_max_scaling_params["min"])
-#         ) + min_max_scaling_params["min"]
-
-#         # calculate the mean and the variance
-#         mean_input_values = torch.mean(input_values, dim=0)
-#         squared_diff = (input_values - mean_input_values) ** 2
-#         variance = torch.mean(squared_diff, dim=0)
-
-#         # calculate the mean squared error
-#         squared_diff = (input_values - outputs) ** 2
-#         mse = torch.mean(squared_diff, dim=0)
-
-#         variance += 1e-6
-#         r2 = torch.ones(layer_size) - (mse / variance)
-
-#         total_r2.append(r2)
-
-#     total_r2_stack = torch.stack(total_r2)
-#     mean_total_r2 = torch.mean(total_r2_stack, dim=0)
-
-#     mean_r2 = torch.mean(mean_total_r2).item()
-#     max_r2 = torch.max(mean_total_r2).item()
-#     min_r2 = torch.min(mean_total_r2).item()
-
-#     print(
-#         f"mean coefficient of determination of the network on the test data: {mean_r2}"
-#     )
-#     print(f"max coefficient of determination of the network on the test data: {max_r2}")
-#     print(f"min coefficient of determination of the network on the test data: {min_r2}")
-
-#     test_results = {"mean_cod": mean_r2, "min_cod": min_r2, "max_cod": max_r2}
 
 
 torch.save(
