@@ -31,5 +31,7 @@ python $(pwd)/rosenbrock/generate_data/generate_data.py
 
 
 python $(pwd)/rosenbrock/train_network.py
+
+export BATCH_SIZE=1
 python $(pwd)/rosenbrock/test_network.py
 

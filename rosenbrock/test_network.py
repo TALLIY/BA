@@ -47,4 +47,4 @@ with torch.no_grad():
 
         diff = np.sqrt((outputs - np.array(output_values.detach().numpy())) ** 2)
 
-        print("distance between: ", diff)
+        print("distance between: ", torch.mean(diff))
