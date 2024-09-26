@@ -47,4 +47,4 @@ with torch.no_grad():
 
         diff = np.sqrt((outputs - np.array(output_values.detach().numpy())) ** 2)
 
-        print("distance between: ", torch.mean(diff))
+        print("mean distance between prediction and exact value: ", torch.mean(diff))
