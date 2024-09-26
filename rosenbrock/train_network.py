@@ -29,7 +29,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 layer_size = int(os.getenv("LAYER_SIZE"))
 num_epochs = int(os.getenv("NUM_EPOCHS"))
 batch_size = int(os.getenv("BATCH_SIZE"))
-learning_rate = int(os.getenv("LEARNING_RATE"))
+learning_rate = float(os.getenv("LEARNING_RATE"))
 training_dataset_path = os.getenv("DATASET_PATH")
 
 
