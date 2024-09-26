@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import Dataset
@@ -5,7 +6,9 @@ from torch.utils.data import Dataset
 
 class CoordinateDataset(Dataset):
     def __init__(self, csv_file, transform=None):
-        self.data = pd.read_csv(csv_file, header=None, low_memory=False)
+        self.data = pd.read_csv(
+            csv_file, header=None, dtype=np.float64, low_memory=False
+        )
         self.transform = transform
 
     def __len__(self):
@@ -13,9 +16,9 @@ class CoordinateDataset(Dataset):
 
     def __getitem__(self, idx):
         idx *= 2
-        input_values = torch.tensor(self.data.iloc[idx, 0:].values, dtype=torch.float32)
+        input_values = torch.tensor(self.data.iloc[idx, 0:].values, dtype=torch.float64)
         output_values = torch.tensor(
-            self.data.iloc[idx + 1, 0:].values, dtype=torch.float32
+            self.data.iloc[idx + 1, 0:].values, dtype=torch.float64
         )
 
         if self.transform:

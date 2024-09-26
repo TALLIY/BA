@@ -8,7 +8,7 @@ from rosenbrock.layers.triangular_sparse_layers import (
 
 class SpareTraingularNetwork(nn.Module):
     def __init__(self, layer_size):
-        super(SpareTraingularNetwork, self).__init__()
+        super().__init__()
         self.Upperlayer1 = UpperTraingularSparseLayer(layer_size)
         self.Lowerlayer1 = LowerTraingularSparseLayer(layer_size)
 
@@ -21,23 +21,22 @@ class SpareTraingularNetwork(nn.Module):
         self.Upperlayer4 = UpperTraingularSparseLayer(layer_size)
         self.Lowerlayer4 = LowerTraingularSparseLayer(layer_size)
 
-        self.activation = nn.Softplus()
+        self.activation = nn.LeakyReLU()
 
     def forward(self, x):
         out = self.Upperlayer1(x)
         out = self.Lowerlayer1(out)
         out = self.activation(out)
 
-        out = self.Upperlayer2(x)
+        out = self.Upperlayer2(out)
         out = self.Lowerlayer2(out)
         out = self.activation(out)
 
-        out = self.Upperlayer3(x)
+        out = self.Upperlayer3(out)
         out = self.Lowerlayer3(out)
         out = self.activation(out)
 
-        out = self.Upperlayer4(x)
+        out = self.Upperlayer4(out)
         out = self.Lowerlayer4(out)
-        out = self.activation(out)
 
         return out

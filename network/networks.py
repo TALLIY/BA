@@ -33,19 +33,20 @@ class sparse_network(nn.Module):
         self.lower_traingular3 = lower_traingular_layer(layer_size, layer_size)
         self.upper_traingular4 = upper_traingular_layer(layer_size, layer_size)
         self.lower_traingular4 = lower_traingular_layer(layer_size, layer_size)
-        self.leakyRelu = nn.LeakyReLU()
+        self.activation = nn.Softplus()
 
     def forward(self, x):
         out = self.lower_traingular1(x)
         out = self.upper_traingular1(out)
-        out = self.leakyRelu(out)
+        out = self.activation(out)
         out = self.lower_traingular2(out)
         out = self.upper_traingular2(out)
-        out = self.leakyRelu(out)
+        out = self.activation(out)
         out = self.lower_traingular3(out)
         out = self.upper_traingular3(out)
-        out = self.leakyRelu(out)
+        out = self.activation(out)
         out = self.upper_traingular4(out)
         out = self.lower_traingular4(out)
+        out = self.activation(out)
 
         return out

@@ -84,6 +84,8 @@ class ComputationalGrapBuilder:
                 return derivatives[0]
             elif "AddBackward" in function.__class__.__name__:
                 return derivatives[0]
+            elif "SoftplusBackward" in function.__class__.__name__:
+                return derivatives[0]
             else:
                 for index, derivative in enumerate(derivatives):
                     if index > 1:
