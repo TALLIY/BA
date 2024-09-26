@@ -10,7 +10,7 @@ number_of_datapoints = int(os.getenv("NUMBER_OF_DATAPOINTS"))
 dataset_path = os.getenv("DATASET_PATH")
 
 
-def generate_data(no_of_data_points: int, min: float = -2.0, max: float = -2.0):
+def generate_data(no_of_data_points: int, min: float = -2.0, max: float = 2.0):
     # x = np.linspace(-2.0, 2.0, no_of_data_points_sqrt)
     # y = np.linspace(-1.0, 3.0, no_of_data_points_sqrt)
 
@@ -36,7 +36,7 @@ def generate_data(no_of_data_points: int, min: float = -2.0, max: float = -2.0):
 
 
 def _save_data_to_csv(data: list[np.ndarray]):
-    with open("dataset_path", "a", newline="") as csvfile:
+    with open(dataset_path, "a", newline="") as csvfile:
         csv_writer = csv.writer(csvfile)
         csv_writer.writerow(data[0])
         csv_writer.writerow(data[1])

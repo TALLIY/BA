@@ -19,9 +19,9 @@ export NUM_EPOCHS=200
 export BATCH_SIZE=1000
 export LEARNING_RATE=0.01
 
+mkdir -p "$(pwd)/rosenbrock/datasets"
 
 export NUMBER_OF_DATAPOINTS=10
-mkdir -p "./rosenbrock/datasets"
 export DATASET_PATH="$(pwd)/rosenbrock/datasets/rosenbrock_training_data.csv"
 python $(pwd)/rosenbrock/generate_data/generate_data.py
 
