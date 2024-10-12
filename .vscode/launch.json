@@ -24,6 +24,17 @@
             "envFile": "${workspaceFolder}/rosenbrock/.env"
           },
           {
+            "name": "Rosenbrock: Test Network",
+            "type": "python",
+            "request": "launch",
+            "program": "rosenbrock/test_network.py",
+            "env": {
+              "IS_DEBUG_MODE": "1",
+              "PYTHONPATH": "${workspaceFolder}"
+            },
+            "envFile": "${workspaceFolder}/rosenbrock/.env"
+          },
+          {
             "name": "Rosenbrock: Visualize Function",
             "type": "python",
             "request": "launch",
@@ -39,6 +50,17 @@
             "type": "python",
             "request": "launch",
             "program": "rosenbrock/Playground.py",
+            "env": {
+              "IS_DEBUG_MODE": "1",
+              "PYTHONPATH": "${workspaceFolder}"
+            },
+            "envFile": "${workspaceFolder}/rosenbrock/.env"
+          },
+          {
+            "name": "Rosenbrock: Matrix-Free Newton",
+            "type": "python",
+            "request": "launch",
+            "program": "rosenbrock/matrix_free_newton.py",
             "env": {
               "IS_DEBUG_MODE": "1",
               "PYTHONPATH": "${workspaceFolder}"

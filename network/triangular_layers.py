@@ -1,36 +1,36 @@
 import torch
 import torch.nn as nn
-from connectivity_masks import lower_traingular_mask, upper_traingular_mask
+
+from network.connectivity_masks import LowerTriangularMask, UpperTriangularMask
 
 
 class sparse_layer(nn.Linear):
-    def __init__(self, input_size, output_size, sparse_mask=None):
-        super(sparse_layer, self).__init__(input_size, output_size, bias=None)
+    def __init__(self, dim, sparse_mask=None):
+        super().__init__(dim, dim, bias=True)
 
         if sparse_mask is not None:
             self.sparse_mask = nn.Parameter(
                 torch.Tensor(sparse_mask), requires_grad=False
             )
-        else:
-            self.sparse_mask = sparse_mask
 
     def forward(self, x):
         if self.sparse_mask is not None:
             sparse_weight = self.weight * self.sparse_mask
-            return torch.matmul(x, sparse_weight.t())
+            output = torch.matmul(x, sparse_weight.t())
         else:
-            return torch.matmul(x, self.weight.t())
+            output = torch.matmul(x, self.weight.t())
+
+        if self.bias is not None:
+            output += self.bias
+
+        return output
 
 
-def upper_traingular_layer(input_dim, output_dim):
-    layer = sparse_layer(
-        input_dim, output_dim, sparse_mask=upper_traingular_mask(input_dim, output_dim)
-    )
+def UpperTraingularSparseLayer(dim):
+    layer = sparse_layer(dim, sparse_mask=UpperTriangularMask(dim))
     return layer
 
 
-def lower_traingular_layer(input_dim, output_dim):
-    layer = sparse_layer(
-        input_dim, output_dim, sparse_mask=lower_traingular_mask(input_dim, output_dim)
-    )
+def LowerTraingularSparseLayer(dim):
+    layer = sparse_layer(dim, sparse_mask=LowerTriangularMask(dim))
     return layer

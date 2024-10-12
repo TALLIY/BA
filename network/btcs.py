@@ -136,7 +136,7 @@ class BTCS:
             )
             plt.plot(
                 list(np.linspace(0, 1, self.n)),
-                surr_f,
+                surr_f.detach().numpy(),
                 label="f inferred",
             )
             plt.title("1D heat equation in a rod of length 1")

@@ -128,7 +128,7 @@ sim = FTCS(length=1, n=101, alpha=0.01, min_T=0, max_T=100)
 
 # sim.generate_function(10000, "../shared/generated_functions")
 
-sim.finite_difference(number_of_iterations=1000, graph=True)
+# sim.finite_difference(number_of_iterations=1000, graph=True)
 
 # sim.generate_data(
 #     number_of_iterations=10000,

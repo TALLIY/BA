@@ -1,5 +1,7 @@
 import torch.nn as nn
-from triangular_layers import lower_traingular_layer, upper_traingular_layer
+from triangular_layers import UpperTraingularSparseLayer
+
+from rosenbrock.layers.triangular_sparse_layers import LowerTraingularSparseLayer
 
 
 class dense_network(nn.Module):
@@ -24,29 +26,31 @@ class dense_network(nn.Module):
 
 class sparse_network(nn.Module):
     def __init__(self, layer_size):
-        super(sparse_network, self).__init__()
-        self.upper_traingular1 = upper_traingular_layer(layer_size, layer_size)
-        self.lower_traingular1 = lower_traingular_layer(layer_size, layer_size)
-        self.upper_traingular2 = upper_traingular_layer(layer_size, layer_size)
-        self.lower_traingular2 = lower_traingular_layer(layer_size, layer_size)
-        self.upper_traingular3 = upper_traingular_layer(layer_size, layer_size)
-        self.lower_traingular3 = lower_traingular_layer(layer_size, layer_size)
-        self.upper_traingular4 = upper_traingular_layer(layer_size, layer_size)
-        self.lower_traingular4 = lower_traingular_layer(layer_size, layer_size)
+        super().__init__()
+        self.Upperlayer1 = UpperTraingularSparseLayer(layer_size)
+        self.Lowerlayer1 = LowerTraingularSparseLayer(layer_size)
+
+        self.Upperlayer2 = UpperTraingularSparseLayer(layer_size)
+        self.Lowerlayer2 = LowerTraingularSparseLayer(layer_size)
+
+        self.Upperlayer3 = UpperTraingularSparseLayer(layer_size)
+        self.Lowerlayer3 = LowerTraingularSparseLayer(layer_size)
+
+        self.Upperlayer4 = UpperTraingularSparseLayer(layer_size)
+        self.Lowerlayer4 = LowerTraingularSparseLayer(layer_size)
+
         self.activation = nn.Softplus()
 
     def forward(self, x):
-        out = self.lower_traingular1(x)
-        out = self.upper_traingular1(out)
+        out = self.Upperlayer1(x)
+        out = self.Lowerlayer1(out)
         out = self.activation(out)
-        out = self.lower_traingular2(out)
-        out = self.upper_traingular2(out)
+
+        out = self.Upperlayer2(out)
+        out = self.Lowerlayer2(out)
         out = self.activation(out)
-        out = self.lower_traingular3(out)
-        out = self.upper_traingular3(out)
-        out = self.activation(out)
-        out = self.upper_traingular4(out)
-        out = self.lower_traingular4(out)
-        out = self.activation(out)
+
+        out = self.Upperlayer3(out)
+        out = self.Lowerlayer3(out)
 
         return out

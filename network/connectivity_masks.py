@@ -1,21 +1,19 @@
-import numpy as np
+import torch
 
 
-def upper_traingular_mask(input_dim, output_dim):
-    upper_traingular_matrix = np.full(shape=(input_dim, output_dim), fill_value=0)
-    for i in range(input_dim):
-        for j in range(output_dim):
+def UpperTriangularMask(dim: int) -> torch.Tensor:
+    upper_triangular_matrix = torch.zeros(dim, dim)
+    for i in range(dim):
+        for j in range(dim):
             if i <= j:
-                upper_traingular_matrix[i][j] = 1.0
+                upper_triangular_matrix[i, j] = 1.0
+    return upper_triangular_matrix
 
-    return upper_traingular_matrix
 
-
-def lower_traingular_mask(input_dim, output_dim):
-    lower_traingular_matrix = np.full(shape=(input_dim, output_dim), fill_value=0)
-    for i in range(input_dim):
-        for j in range(output_dim):
+def LowerTriangularMask(dim: int) -> torch.Tensor:
+    lower_triangular_matrix = torch.zeros(dim, dim)
+    for i in range(dim):
+        for j in range(dim):
             if i >= j:
-                lower_traingular_matrix[i][j] = 1.0
-
-    return lower_traingular_matrix
+                lower_triangular_matrix[i, j] = 1.0
+    return lower_triangular_matrix

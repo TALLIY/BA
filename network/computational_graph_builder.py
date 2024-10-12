@@ -21,8 +21,10 @@ class ComputationalGrapBuilder:
             self._traverse_graph(
                 grad_fn, recursion_depth, prev_derivative=derivative, current_index=i
             )
+        chain = self.jacobian_chain
+        self.jacobian_chain = []
 
-        return self.jacobian_chain
+        return chain
 
     def _traverse_graph(
         self,
@@ -42,6 +44,7 @@ class ComputationalGrapBuilder:
                 continue
 
             seed = self._generate_seed(prev_derivative, current_index)
+
             derivative = self._pick_derivative(function[0](seed), function[0])
             self._add_to_jacobian_chain(derivative, recursion_depth)
             self._traverse_graph(

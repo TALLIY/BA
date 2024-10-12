@@ -15,13 +15,13 @@ if os.getenv("TRAIN_DENSE_NETWORK") == "0":
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 if train_dense_network:
-    model = dense_network(199).to(device)
+    model = dense_network(99).to(device)
 else:
-    model = sparse_network(199).to(device)
+    model = sparse_network(99).to(device)
 model.float()
 
 checkpoint = torch.load(
-    "../shared/weights/model_weights_for_layer_size_199_for_dense_False.pth"
+    "../shared/weights/model_weights_for_layer_size_99_for_dense_False.pth"
 )
 model.load_state_dict(checkpoint)
 
@@ -31,16 +31,19 @@ model.load_state_dict(checkpoint)
 #     print(f"{name}: {param}")
 
 
-sim = BTCS(length=1, delta_x=0.005, alpha=0.01, delta_t=0.01, min_T=0, max_T=1000)
+dt_max = 0.01**2 / (2 * 0.01)
+dt = 0.9 * dt_max
+
+sim = BTCS(length=1, delta_x=0.01, alpha=0.01, delta_t=dt, min_T=0, max_T=1000)
 
 suff_f = sim.infer_final_step_value(
     model=model,
-    state_dict_path="../shared/weights/model_weights_for_layer_size_199_for_dense_False.pth",
-    denormalisation_params_path="../shared/parameters/min_max_scaling_params_for_layer_size_199_for_dense_False.pkl",
-    compare=False,
+    state_dict_path="../shared/weights/model_weights_for_layer_size_99_for_dense_False.pth",
+    denormalisation_params_path="../shared/parameters/min_max_scaling_params_for_layer_size_99_for_dense_False.pkl",
+    compare=True,
 )
 
-M = np.identity(199).dot(suff_f.detach().numpy())
+M = np.identity(99).dot(suff_f.detach().numpy())
 
 state_dict_items = list(model.state_dict().items())
 reversed_state_dict_items = reversed(state_dict_items)

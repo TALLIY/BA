@@ -5,6 +5,7 @@ import numpy as np
 import torch
 from dotenv import load_dotenv
 
+from network.computational_graph_builder import ComputationalGrapBuilder
 from rosenbrock.generate_data.function import rosenbrock_nd_gradient
 from rosenbrock.networks.sparse_traingular_network import SpareTraingularNetwork
 from rosenbrock.scaling import min_max_denormalise
@@ -17,34 +18,44 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = SpareTraingularNetwork(2).to(device)
 model.double()
 checkpoint = torch.load(
-    "/Users/talli/BA/rosenbrock/saved_weights/rosenbrock_trained_model_weights_sparse.pth"
+    "/Users/talli/BA/rosenbrock/saved_weights/rosenbrock_trained_model_weights_sparse_prod.pth"
 )
 
 model.load_state_dict(checkpoint)
 model.eval()
 with open(
-    "/Users/talli/BA/rosenbrock/saved_params/rosenbrock_sampled_data_normalisation_params.pkl",
+    "/Users/talli/BA/rosenbrock/saved_params/rosenbrock_sampled_data_normalisation_params_2.pkl",
     "rb",
 ) as f:
     denormalisation_params = pickle.load(f)
 min, max = denormalisation_params["min"], denormalisation_params["max"]
 
-input_np = np.array(np.random.uniform(-2.0, 2.0, size=(2)))
+input_np = np.array([1.0, 0.0])
 input = torch.tensor(input_np.astype(np.float64), requires_grad=True)
 rosenbrock_grad = rosenbrock_nd_gradient(input_np)
 sur = model(input)
 
 f_surr = min_max_denormalise(sur, min, max)
-print(rosenbrock_grad)
-print(f_surr)
+print(sur)
 
-print(np.sqrt((rosenbrock_grad - np.array(f_surr.detach().numpy())) ** 2))
+cgb = ComputationalGrapBuilder()
+matrix_chain = cgb.construct_graph(sur)
 
-# cgb = ComputationalGrapBuilder()
-# matrix_chain = cgb.construct_graph(sur)
 
-# for matrix in matrix_chain:
-#     print(matrix)
+print(
+    torch.tensor([[-0.5961, 0.0000], [0.0517, -0.4507]])
+    @ torch.tensor([[-0.9373, 1.5036], [0.0000, 1.5633]])
+    @ torch.tensor([[1.0000, 0.0000], [0.0000, 0.0100]])
+    @ torch.tensor([[-1.4935, 0.0000], [0.4343, 2.1688]])
+    @ torch.tensor([[3.7157, 0.3103], [0.0000, -1.9756]])
+    @ torch.tensor([[0.0100, 0.0000], [0.0000, 1.0000]])
+    @ torch.tensor([[-1.0642, 0.0000], [0.5029, -0.7959]])
+    @ torch.tensor([[-2.4911, -0.4599], [0.0000, -1.3042]])
+    @ torch.tensor([[0.0100, 0.0000], [0.0000, 1.0000]])
+    @ torch.tensor([[-1.5181, 0.0000], [-0.9812, -0.9695]])
+    @ torch.tensor([[1.5743, 0.3415], [0.0000, -0.7797]])
+    @ torch.tensor([1.0, 0.0])
+)
 
 # seed = torch.tensor([1.0, 0.0])
 # d0_fn = sur.grad_fn

@@ -3,7 +3,8 @@ from typing import List
 
 import matplotlib.pyplot as plt
 import torch
-from computational_graph_builder import ComputationalGrapBuilder
+
+from network.computational_graph_builder import ComputationalGrapBuilder
 
 sys.setrecursionlimit(2000)
 
@@ -72,8 +73,6 @@ class FTCS:
             timesteps.append(y)
             i += 1
 
-        self.cgb.construct_graph(timesteps[-1])
-
         print("Temperature for final timestep: ", T_0)
         print("Number of iterations: ", len(timesteps))
         print("Total simulation time: ", len(timesteps) * self.dt)
@@ -96,8 +95,9 @@ class FTCS:
             plt.show()
 
         print("dim: ", len(timesteps[-1]))
+        return timesteps, A
 
 
-sim = FTCS(length=1, n=101, alpha=0.01, min_T=0, max_T=100)
+# sim = FTCS(length=1, n=101, alpha=0.01, min_T=0, max_T=100)
 
-sim.finite_difference(number_of_iterations=1000, graph=True)
+# sim.finite_difference(number_of_iterations=1000, graph=True)

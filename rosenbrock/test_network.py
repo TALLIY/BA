@@ -1,7 +1,6 @@
 import os
 import pickle
 
-import numpy as np
 import torch
 
 from rosenbrock.data_loaders.coordinate_dataset_loader import CoordinateDataset
@@ -13,6 +12,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 layer_size = int(os.getenv("LAYER_SIZE"))
 batch_size = int(os.getenv("BATCH_SIZE"))
 test_dataset_path = os.getenv("DATASET_PATH")
+
+print("layer_size: ", layer_size)
 
 testing_dataset = CoordinateDataset(test_dataset_path)
 
@@ -29,7 +30,7 @@ checkpoint = torch.load(
 model.load_state_dict(checkpoint)
 model.eval()
 with open(
-    "./rosenbrock/saved_params/rosenbrock_sampled_data_normalisation_params.pkl",
+    "./rosenbrock/saved_params/rosenbrock_sampled_data_normalisation_params_2.pkl",
     "rb",
 ) as f:
     denormalisation_params = pickle.load(f)
@@ -42,9 +43,9 @@ with torch.no_grad():
         input_values = input_values.to(device)
         outputs = min_max_denormalise(model(input_values), min, max)
 
-        print("predicted value: ", outputs)
-        print("exact value: ", output_values)
+        if i % 10 == 0:
+            print("predicted value: ", outputs)
+            print("exact value: ", output_values)
 
-        diff = np.sqrt((outputs - np.array(output_values.detach().numpy())) ** 2)
-
-        print("mean distance between prediction and exact value: ", torch.mean(diff))
+        # diff = np.sqrt((outputs - np.array(output_values.detach().numpy())) ** 2)
+        # print("mean distance between prediction and exact value: ", torch.mean(diff))
