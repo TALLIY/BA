@@ -1,4 +1,3 @@
-import pickle
 import sys
 import warnings
 
@@ -7,7 +6,6 @@ import torch
 from torch.func import jacfwd
 
 from network.computational_graph_builder import ComputationalGrapBuilder
-from rosenbrock.networks.sparse_traingular_network import SpareTraingularNetwork
 
 sys.setrecursionlimit(2000)
 
@@ -15,27 +13,27 @@ sys.setrecursionlimit(2000)
 warnings.filterwarnings("ignore")
 
 
-def min_max_denormalise(
-    input: torch.Tensor, min: torch.Tensor | float, max: torch.Tensor | float
-):
-    return (input * (max - min)) + min
+# def min_max_denormalise(
+#     input: torch.Tensor, min: torch.Tensor | float, max: torch.Tensor | float
+# ):
+#     return (input * (max - min)) + min
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = SpareTraingularNetwork(2).to(device)
-model.double()
-checkpoint = torch.load(
-    "/Users/talli/BA/rosenbrock/saved_weights/rosenbrock_trained_model_weights_sparse_prod.pth"
-)
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# model = SpareTraingularNetwork(2).to(device)
+# model.double()
+# checkpoint = torch.load(
+#     "/Users/talli/BA/rosenbrock/saved_weights/rosenbrock_trained_model_weights_sparse_prod.pth"
+# )
 
-model.load_state_dict(checkpoint)
-model.eval()
-with open(
-    "/Users/talli/BA/rosenbrock/saved_params/rosenbrock_sampled_data_normalisation_params_2.pkl",
-    "rb",
-) as f:
-    denormalisation_params = pickle.load(f)
-minimum, maximum = denormalisation_params["min"], denormalisation_params["max"]
+# model.load_state_dict(checkpoint)
+# model.eval()
+# with open(
+#     "/Users/talli/BA/rosenbrock/saved_params/rosenbrock_sampled_data_normalisation_params_2.pkl",
+#     "rb",
+# ) as f:
+#     denormalisation_params = pickle.load(f)
+# minimum, maximum = denormalisation_params["min"], denormalisation_params["max"]
 
 
 length = 1
@@ -136,8 +134,8 @@ def rosenbrock_hessian(input: np.ndarray, b=100):
     return np.array([[dxx, dxy], [dyx, dyy]])
 
 
-def rosenbrock_gradient_surrogate(input: torch.Tensor):
-    return model(input)
+# def rosenbrock_gradient_surrogate(input: torch.Tensor):
+#     return model(input)
 
 
 def test_function(input):
